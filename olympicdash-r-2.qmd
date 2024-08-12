@@ -282,7 +282,8 @@ wOlympics |>
     legend.position = c(0.9, 0.2),
     legend.direction = "horizontal",
     legend.background = element_rect(fill = "white", color = "gray")
-  )
+  )+
+  scale_fill_manual(values=c("#CD7F32", "#C0C0C0", "#FFD700"))
 ```
 
 ## Column {width=35%}
