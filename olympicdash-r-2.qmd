@@ -8,6 +8,9 @@ format:
 logo: images/olympics-logo.svg
 ---
 
+# ☀️ Summer Olympics
+
+
 ```{r}
 #| label: load-packages
 #| message: false
@@ -22,7 +25,7 @@ olympics_full <- read_csv("data/olympics.csv")
 ```
 
 ```{r}
-#| label: prep-data
+#| label: prep-data-summer
 olympics <- olympics_full |>
   filter(
     season == "Summer",
@@ -33,7 +36,7 @@ olympics <- olympics_full |>
   mutate(medal = fct_relevel(medal, "Bronze", "Silver", "Gold"))
 ```
 
-## Column
+## Column {width=65%}
 
 ### Row {height=60%}
 
@@ -89,15 +92,308 @@ olympics |>
   )
 ```
 
-## Column
+## Column {width=35%}
+
+### Row {height=25%}
 
 ```{r}
-#| title: Medals by country
+# calculate value box data
+
+#most golds
+gold=olympics |>
+  filter(medal=="Gold") |>
+  group_by(team) |>
+  summarize(count=n()) |>
+  arrange(desc(count)) |>
+  filter(row_number()==1)
+
+goldCount=gold$count[1]
+goldCountry=gold$team[1]
+
+
+
+
+silver=olympics |>
+  filter(medal=="Silver") |>
+  group_by(team) |>
+  summarize(count=n()) |>
+  arrange(desc(count)) |>
+  filter(row_number()==1)
+
+silverCount=silver$count[1]
+silverCountry=silver$team[1]
+
+
+bronze=olympics |>
+  filter(medal=="Bronze") |>
+  group_by(team) |>
+  summarize(count=n()) |>
+  arrange(desc(count)) |>
+  filter(row_number()==1)
+
+bronzeCount=bronze$count[1]
+bronzeCountry=bronze$team[1]
+
+
+```
+
+
+
+
+
+::: {.valuebox icon="award-fill" color="#FFD700"}
+Most Gold:
+
+ `{r} goldCount`\
+ `{r} goldCountry`
+:::
+
+
+
+::: {.valuebox icon="award-fill" color="#C0C0C0"}
+Most Silver:
+
+ `{r} silverCount`\
+ `{r} silverCountry`
+:::
+
+
+
+::: {.valuebox icon="award-fill" color="#CD7F32"}
+Most Bronze:
+
+ `{r} bronzeCount`\
+ `{r} bronzeCountry`
+:::
+
+
+
+
+### Row {height=75%}{.tabset}
+
+```{r}
+#| title: Top 30 Medals
 olympics |>
   count(team, medal) |>
   pivot_wider(names_from = medal, values_from = n, values_fill = 0) |>
   mutate(Total = Bronze + Gold + Silver) |>
   relocate(Team = team, Gold, Silver, Bronze, Total) |>
   arrange(desc(Total), Team) |>
-  gt()
+  select(Team, Gold, Silver,Bronze) |>
+  slice_head(n=30) |>
+  gt() |>
+  data_color(
+    method="numeric",
+    palette="nord::aurora"
+
+  )
+```
+
+```{r}
+#| title: Bottom 30 Medals
+olympics |>
+  count(team, medal) |>
+  pivot_wider(names_from = medal, values_from = n, values_fill = 0) |>
+  mutate(Total = Bronze + Gold + Silver) |>
+  relocate(Team = team, Gold, Silver, Bronze, Total) |>
+  arrange(Total, Team) |>
+  select(Team, Gold, Silver,Bronze) |>
+  slice_head(n=30) |>
+    gt()|>
+  data_color(
+    method="numeric",
+    palette="nord::aurora"
+
+  )
+```
+
+# ❄️️ Winter Olympics
+
+
+
+
+```{r}
+#| label: prep-data-winter
+wOlympics <- olympics_full |>
+  filter(
+    season == "Winter",
+    !is.na(medal)
+  ) |>
+  separate_wider_delim(cols = team, names = c("team", "suffix"), delim = "-", too_many = "merge", too_few = "align_start") |>
+  select(-suffix) |>
+  mutate(medal = fct_relevel(medal, "Bronze", "Silver", "Gold"))
+```
+
+
+## Column {width=65%}
+
+### Row {height=60%}
+
+```{r}
+#| title: Medals by sport
+#| fig-width: 10
+wOlympics |>
+  mutate(
+    sport = fct_lump_n(sport, n = 15),
+    sport = fct_infreq(sport),
+    sport = fct_rev(sport),
+    sport = fct_relevel(sport, "Other", after = 0)
+  ) |>
+  ggplot(aes(y = sport, fill = medal)) +
+  geom_bar() +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = "Medal"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = c(0.9, 0.2),
+    legend.direction = "horizontal",
+    legend.background = element_rect(fill = "white", color = "gray")
+  )
+```
+
+### Row {height=40%}
+
+```{r}
+#| title: Medals by year
+#| fig-asp: 0.3
+#| fig-width: 10
+wOlympics |>
+  count(year, medal) |>
+  ggplot(aes(x = year, y = n, color = medal)) +
+  geom_point(size = 0.5) +
+  geom_line() +
+  guides(color = guide_legend(reverse = TRUE)) +
+  scale_x_continuous(breaks = seq(1896, 2020, 8)) +
+  labs(
+    x = "Year",
+    y = NULL,
+    color = "Medal"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = c(0.9, 0.2),
+    legend.direction = "horizontal",
+    legend.background = element_rect(fill = "white", color = "gray")
+  )
+```
+
+## Column {width=35%}
+
+
+
+
+### Row {height=25%}
+
+```{r}
+# calculate value box data
+
+#most golds
+gold=wOlympics |>
+  filter(medal=="Gold") |>
+  group_by(team) |>
+  summarize(count=n()) |>
+  arrange(desc(count)) |>
+  filter(row_number()==1)
+
+goldCount=gold$count[1]
+goldCountry=gold$team[1]
+
+
+
+
+silver=wOlympics |>
+  filter(medal=="Silver") |>
+  group_by(team) |>
+  summarize(count=n()) |>
+  arrange(desc(count)) |>
+  filter(row_number()==1)
+
+silverCount=silver$count[1]
+silverCountry=silver$team[1]
+
+
+bronze=wOlympics |>
+  filter(medal=="Bronze") |>
+  group_by(team) |>
+  summarize(count=n()) |>
+  arrange(desc(count)) |>
+  filter(row_number()==1)
+
+bronzeCount=bronze$count[1]
+bronzeCountry=bronze$team[1]
+
+
+```
+
+
+
+
+::: {.valuebox icon="award-fill" color="#FFD700"}
+Most Gold:
+
+ `{r} goldCount`\
+ `{r} goldCountry`
+:::
+
+
+
+::: {.valuebox icon="award-fill" color="#C0C0C0"}
+Most Silver:
+
+ `{r} silverCount`\
+ `{r} silverCountry`
+:::
+
+
+
+::: {.valuebox icon="award-fill" color="#CD7F32"}
+Most Bronze:
+
+ `{r} bronzeCount`\
+ `{r} bronzeCountry`
+:::
+
+
+
+
+### Row {height=75%}{.tabset}
+
+```{r}
+#| title: Top 30 Medals
+wOlympics |>
+  count(team, medal) |>
+  pivot_wider(names_from = medal, values_from = n, values_fill = 0) |>
+  mutate(Total = Bronze + Gold + Silver) |>
+  relocate(Team = team, Gold, Silver, Bronze, Total) |>
+  arrange(desc(Total), Team) |>
+  select(Team, Gold, Silver,Bronze) |>
+  slice_head(n=30) |>
+  gt() |>
+  data_color(
+    method="numeric",
+    palette="nord::aurora"
+
+  )
+```
+
+```{r}
+#| title: Bottom 30 Medals
+wOlympics |>
+  count(team, medal) |>
+  pivot_wider(names_from = medal, values_from = n, values_fill = 0) |>
+  mutate(Total = Bronze + Gold + Silver) |>
+  relocate(Team = team, Gold, Silver, Bronze, Total) |>
+  arrange(Total, Team) |>
+  select(Team, Gold, Silver,Bronze) |>
+  slice_head(n=30) |>
+    gt()|>
+  data_color(
+    method="numeric",
+    palette="nord::aurora"
+
+  )
 ```
